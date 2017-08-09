@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Multiple Camera Experiment</title>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <div id="connect"> 
+        <form>
+          <div class="form-group">
+            <label class="col-form-label">Server address</label>
+            <input class="form-control" type="text" id="server-address-input">
+          </div>
+          <div class="form-group">
+            <label class="col-form-label">Name</label>
+            <input class="form-control" type="text" id="name-input" value="test">
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn btn-primary" id="connect-as-hub">Connect as the hub</button>
+            <button type="button" class="btn btn-primary" id="connect-as-cam">Connect as a camera</button>
+          </div>
+          <div>
+            <button type="button" class="btn btn-primary" id="stream">Stream</button>
+          </div>
+          <div id="error-message"></div>
+        </form>
+      </div>
+      <div id="video-wrapper">
+      </div>
+    </div>
+
+    <!-- js files -->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="rtc.js"></script>
+    <script src="port.js"></script>
+  </body>
+</html>
