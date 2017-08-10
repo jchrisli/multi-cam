@@ -1,0 +1,13 @@
+#view-button-left, #view-button-right {
+  display: none;
+  padding: 10px;
+}
+
+#show {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+}

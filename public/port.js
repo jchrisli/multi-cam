@@ -19,9 +19,9 @@ function setUpWebSocket(serverUrl, isHub, closeCallback, messageCallback) {
     if(isHub) {
       // -2 is just a placeholder; at this point no id has been assigned yet
       // -1 for the signaling server itself
-      signalToServer(connection, -2, -1, 'connection_request', 'hub'); 
+      signalToServer(connection, -2, -1, 'connection_request', 'hub');
     } else {
-      signalToServer(connection, -2, -1, 'connection_request', ''); 
+      signalToServer(connection, -2, -1, 'connection_request', '');
     }
   };
   connection.onclose = closeCallback;
@@ -42,41 +42,69 @@ function setUp() {
   //peer connections are keyed by non-hub end id number
   var pc = {};
   var wsc = null;
+  //WebRTC streams
+  var streams = [];
+  var curStreamInd = 0;
+  var streamViewElement;
 
   function checkInputs() {
-    if(name === '' || serverAddress === '') {
-      return false;
-    } else return true;
+    return name !== '' && serverAddress !== '';
   }
 
-  //Hub UI callback
-  function addStreamView (id) {
+
+  //Direction is bool variable; true for incrementing the index, false for decrementing
+  //Loop back
+  function switchStreamView(direction) {
+      curStreamInd = direction ? curStreamInd + 1 : curStreamInd - 1;
+      if(curStreamInd >= streams.length) curStreamInd = 0;
+      if(curStreamInd < 0) curStreamInd = streams.length - 1;
+      if(streamViewElement) {
+        streamViewElement.attr('src', streams[curStreamInd].vid);
+      }
+  }
+
+  function addStreamView(initSource) {
+    var vidDiv = $('<div></div>', {
+      class: 'camera-view-wrapper',
+    });
+    var name = $('<div></div>', {
+      class: 'camera-view-name',
+    });
+    var vid = $('<video />', {
+      src: initSource,
+      //width: 100%,
+      height: 480,
+      class: 'camera-view',
+      autoplay: ''
+    });
+    var leftButton = $('#view-button-left');
+    var rightButton = $('#view-button-right');
+    leftButton.css('display', 'inline-block');
+    rightButton.css('display', 'inline-block');
+    leftButton.click(function() {switchStreamView(false)});
+    rightButton.click(function() {switchStreamView(true)});
+    streamViewElement = vid;
+    vidDiv.css('float', 'left');
+    //vidDiv.css('width', '45%');
+    vidDiv.css('margin', 'auto');
+    vidDiv.css('display', 'inline-block');
+    vidDiv.append(vid);
+    vidDiv.append(name);
+    vidDiv.appendTo($('#video-wrapper'));
+  }
+
+  //Add only one video element, which supports switching between the streams
+  //FIXME: this sort of return-a-function-from-function is ugly, fix it
+  function addStream (id) {
     return function (source) {
-      var vidDiv = $('<div></div>', {
-        class: 'camera-view-wrapper',
-        id: 'cam-wrapper-' + id
-      });
-      var name = $('<div></div>', {
-        class: 'camera-view-name',
-        id: 'cam-name-' + id
-      });
-      var vid = $('<video />', {
-        src: source,
-        //width: 100%,
-        height: 480,
-        id: 'cam-vid-' + id,
-        class: 'camera-view',
-        autoplay: ''
-        //class: 'col-md-6 col-sm-12'
-      });
-      vidDiv.css('float', 'left');
-      //vidDiv.css('width', '45%');
-      vidDiv.css('margin', 'auto');
-      vidDiv.append(vid);
-      vidDiv.append(name);
-      vidDiv.appendTo($('#video-wrapper'));
+      streams.push({id: id, vid: source});
+      //if this is the first stream added, create the video videw
+      if (streams.length === 1) {
+        addStreamView(source);
+      }
     }
   }
+
 
   function hideAll() {
     $('#connect').hide();
@@ -95,7 +123,7 @@ function setUp() {
   function createHubRTC(id) {
     var callbacks = {
       signalCallback: respondToServer(wsc, 0, id),
-      uiCallback: addStreamView(id)
+      uiCallback: addStream(id)
     }
     pc[id] = RTC.create(false, callbacks);
   }
@@ -114,14 +142,14 @@ function setUp() {
       var message = JSON.parse(evt.data);
       console.log(message);
       switch(message.type) {
-        case 'connection_accepted': 
+        case 'connection_accepted':
           state.open = true;
           state.id = message.message;
           setInterval(function () {signalToServer(wsc, state.id, -1, 'ping', '');}, 500);
           break;
         case 'connection_rejected':
           state.open = false;
-          updateCB('Connection request rejected: ' + message.message); 
+          updateCB('Connection request rejected: ' + message.message);
           break;
         case 'sdp':
         case 'candidate':
@@ -145,7 +173,7 @@ function setUp() {
           } else updateCB('RTC error: RTC channel not established.');
           break;
         case 'name':
-          $('#cam-vid-' + message.from).html('Camera ' + message.message); 
+          $('#cam-vid-' + message.from).html('Camera ' + message.message);
           break;
         default:
           updateCB('WebSocket error: Unknow message type.');
