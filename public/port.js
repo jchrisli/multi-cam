@@ -105,6 +105,10 @@ function setUp() {
     }
   }
 
+  function showFeedbackView (stream) {
+    //Add local stream to the video element
+    $('#self-view').attr('src', stream);
+  }
 
   function hideAll() {
     $('#connect').hide();
@@ -124,17 +128,22 @@ function setUp() {
     var callbacks = {
       signalCallback: respondToServer(wsc, 0, id),
       uiCallback: addStream(id)
-    }
+    };
     pc[id] = RTC.create(false, callbacks);
+
   }
 
   // non-hub RTC connections
   function createRTC() {
     var cbs = {
       signalCallback: respondToServer(wsc, state.id, 0),
-      uiCallback: null
+      uiCallback: showFeedbackView
     };
     pc[0] = RTC.create(true, cbs);
+
+    var feedback = $('#feedback');
+    //Make the feedback view full-screen
+    feedback[0].webkitRequestFullscreen();
   }
 
   function WSMessageHandler(updateCB) {

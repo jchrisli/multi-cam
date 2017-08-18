@@ -3,7 +3,7 @@ var RTC = (function () {
 
   rtc.create = function(isCaller, callbacks) {
     //TODO: add configuration file
-    var RTCConstructor = typeof webkitRTCPeerConnection === 'function' ? webkitRTCPeerConnection : RTCPeerConnection; 
+    var RTCConstructor = typeof webkitRTCPeerConnection === 'function' ? webkitRTCPeerConnection : RTCPeerConnection;
     var pc = new RTCConstructor({
       iceServers: [{url: 'stun:stun1.l.google.com:19305'}]
     });
@@ -25,18 +25,18 @@ var RTC = (function () {
 
     function gotDescription(desc) {
       pc.setLocalDescription(desc);
-      callbacks.signalCallback({type: 'sdp', content: desc}); 
+      callbacks.signalCallback({type: 'sdp', content: desc});
     }
 
     // get the local stream, show it in the local video element and send it
     if(isCaller) {
-      navigator.getUserMedia({ "audio": false, "video": true }, function (stream) {
-        //might be a good idea to add self view, but hold for now
-        //selfView.src = URL.createObjectURL(stream);
+      navigator.getUserMedia({ "audio": true, "video": true }, function (stream) {
+        //TODO: add full screen feedback view, but hold for now
         pc.addStream(stream);
+        callbacks.uiCallback(URL.createObjectURL(stream));
         pc.createOffer(gotDescription, function() {});
       }, function() {});
-    } 
+    }
 
     pc.createHubAnswer = function() {
       if(!isCaller) {
