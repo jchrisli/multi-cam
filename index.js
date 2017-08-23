@@ -13,8 +13,15 @@ var servConfig = {
 
 var app = express();
 // server static files in the 'public' folder
-app.use(express.static('public', {index: 'port.html'}));
-// set up a default route
+app.use(express.static('public'));
+// set up routes
+app.get('/camera', function(req, res) {
+    res.sendFile('public/view.html', {root: __dirname});
+});
+app.get('/', function(req, res) {
+    res.sendFile('public/port.html', {root: __dirname});
+});
+
 
 //create a HTTPS server
 var server = https.createServer({

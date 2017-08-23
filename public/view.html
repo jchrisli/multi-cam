@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Camera - Multiple Camera Experiment</title>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/component.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <div id="connect" class="row">
+        <form>
+          <div class="form-group">
+            <label class="col-form-label">Server address</label>
+            <input class="form-control" type="text" id="server-address-input">
+          </div>
+          <div class="form-group">
+            <label class="col-form-label">Name</label>
+            <input class="form-control" type="text" id="name-input" value="test">
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn btn-primary" id="connect-as-cam">Connect as a camera</button>
+            <button type="button" class="btn btn-primary" id="stream" disabled>Stream</button>
+          </div>
+          </div>
+          <div id="error-message" class="alert alert danger"></div>
+        </form>
+      </div>
+      <!--local feedback view -->
+      <div id="feedback">
+          <video id="self-view" width="480" autoplay muted></video>
+      </div>
+    </div>
+
+    <!-- js files -->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="js/rtc.js"></script>
+    <script src="js/view.js"></script>
+    <script src="js/signal-channel.js"></script>
+  </body>
+</html>

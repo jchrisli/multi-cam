@@ -1,6 +1,6 @@
 //port.js
-//WebSocket signaling and UI management
-
+//Hub UI management
+/*
 function signalToServer(connection, from, to, type, message) {
   var toSend = {
     type: type,
@@ -28,19 +28,23 @@ function setUpWebSocket(serverUrl, isHub, closeCallback, messageCallback) {
   connection.onmessage = messageCallback;
   return connection;
 }
+*/
+//Unity instance
+var gameInstance = null;
 
 function notify(message) {
+    console.error(message);
   $('#error-message').html(message);
 }
 
-function setUp() {
+function setUpHub() {
   var state = {
     open: false,
     id: -2,
     isHub: false
   };
   //peer connections are keyed by non-hub end id number
-  var pc = {};
+  var pc = new Map();
   var wsc = null;
   //WebRTC streams
   var streams = [];
@@ -60,7 +64,15 @@ function setUp() {
       if(curStreamInd < 0) curStreamInd = streams.length - 1;
       if(streamViewElement) {
         streamViewElement.attr('src', streams[curStreamInd].vid);
-      }
+    }
+  }
+
+  //To be called by the Unity Script
+  function setStreamView(id) {
+      let target = streams.find(streamObj => streamObj.id === id);
+      if(target) {
+          streamViewElement.attr('src', target.vid);
+      } else console.error('Cannot switch to stream ' + id + ' :not found.');
   }
 
   function addStreamView(initSource) {
@@ -98,23 +110,25 @@ function setUp() {
   function addStream (id) {
     return function (source) {
       streams.push({id: id, vid: source});
+      //Notify the webgl app of the new stream
+      gameInstance.SendMessage('Scene', 'AddCam', id);
       //if this is the first stream added, create the video videw
       if (streams.length === 1) {
         addStreamView(source);
       }
     }
   }
-
+/*
   function showFeedbackView (stream) {
     //Add local stream to the video element
     $('#self-view').attr('src', stream);
   }
-
+*/
   function hideAll() {
     $('#connect').hide();
     $('#video-wrapper').hide();
   }
-
+/*
   function respondToServer(wsConnection, from, to) {
     var fn = function(rtcSignal) {
       if(rtcSignal.type === 'candidate' || rtcSignal.type === 'sdp') {
@@ -123,79 +137,35 @@ function setUp() {
     }
     return fn;
   }
-
-  function createHubRTC(id) {
+*/
+  function createHubRTC(signalCB, id) {
     var callbacks = {
-      signalCallback: respondToServer(wsc, 0, id),
+      signalCallback: signalCB,
       uiCallback: addStream(id)
     };
-    pc[id] = RTC.create(false, callbacks);
-
+    pc.set(id, RTC.create(false, callbacks));
   }
-
+/*
   // non-hub RTC connections
   function createRTC() {
     var cbs = {
       signalCallback: respondToServer(wsc, state.id, 0),
       uiCallback: showFeedbackView
     };
-    pc[0] = RTC.create(true, cbs);
+    pc.set(0, RTC.create(true, cbs));
 
     var feedback = $('#feedback');
     //Make the feedback view full-screen
     feedback[0].webkitRequestFullscreen();
   }
+*/
 
-  function WSMessageHandler(updateCB) {
-    return function(evt) {
-      var message = JSON.parse(evt.data);
-      console.log(message);
-      switch(message.type) {
-        case 'connection_accepted':
-          state.open = true;
-          state.id = message.message;
-          setInterval(function () {signalToServer(wsc, state.id, -1, 'ping', '');}, 500);
-          break;
-        case 'connection_rejected':
-          state.open = false;
-          updateCB('Connection request rejected: ' + message.message);
-          break;
-        case 'sdp':
-        case 'candidate':
-          //add one RTC connection
-          if(state.isHub === true && !pc[message.from]) {
-            createHubRTC(message.from);
-          }
-          if(pc[message.from]) {
-            if(message.type === 'sdp') {
-              pc[message.from].setRemoteDescription(new RTCSessionDescription(message.message),
-              function() {
-                if(state.isHub === true) {
-                  pc[message.from].createHubAnswer();
-                }
-              }, function() {});
-            } else {
-              if(message.message) {
-                pc[message.from].addIceCandidate(new RTCIceCandidate(message.message));
-              }
-            }
-          } else updateCB('RTC error: RTC channel not established.');
-          break;
-        case 'name':
-          $('#cam-vid-' + message.from).html('Camera ' + message.message);
-          break;
-        default:
-          updateCB('WebSocket error: Unknow message type.');
-      }
-    };
-  }
-
-  function wsConnect(isHub, disableCallback) {
+  function wsConnect(successCallback) {
     var name = $('#name-input').val();
     var serverAddress = $('#server-address-input').val();
     if(name && serverAddress) {
-      wsc = setUpWebSocket(serverAddress, isHub, null, WSMessageHandler(notify));
-      disableCallback();
+      wsc = new SignalChannel(serverAddress, state, pc, null, notify, createHubRTC);
+      successCallback();
     } else {
       notify('name or server address cannot be empty.');
     }
@@ -204,25 +174,21 @@ function setUp() {
   //button event handlers
   $('#connect-as-hub').on('click', function(evt) {
     state.isHub = true;
-    wsConnect(true, function () {
-      $('#connect-as-cam').prop('disabled', true);
-      $('#stream').prop('disabled', true);
+    wsConnect(function () {
+        $('#connect-as-hub').html('Connected');
+        $('#connect-as-hub').prop('disabled', true)
+        gameInstance = UnityLoader.instantiate("gameContainer", "unity_build/Build/unity_build.json", {onProgress: UnityProgress});
     });
   });
 
-  $('#connect-as-cam').on('click', function(evt) {
-    state.isHub = false;
-    wsConnect(false, function () {
-      $('#connect-as-hub').prop('disabled', true);
-    });
-  });
-
-  $('#stream').on('click', function(evt) {
-    createRTC();
-  });
   var defaultUrl = window.location.href;
 
   $('#server-address-input').val(defaultUrl.substring(8, defaultUrl.length - 1));
+
+  //Interface to the UnityScript
+  return {
+      setStreamView: setStreamView
+  };
 }
 
-setUp();
+var videoPlayer = setUpHub();

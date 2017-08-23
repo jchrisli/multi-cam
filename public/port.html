@@ -4,11 +4,14 @@
     <title>Multiple Camera Experiment</title>
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="component.css" rel="stylesheet">
+    <link href="css/component.css" rel="stylesheet">
+    <link href="css/unity_style.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="unity_build/TemplateData/favicon.ico">
   </head>
   <body>
     <div class="container">
-      <div id="connect">
+      <div id="connect" class="row">
         <form>
           <div class="form-group">
             <label class="col-form-label">Server address</label>
@@ -20,12 +23,9 @@
           </div>
           <div class="form-group">
             <button type="button" class="btn btn-primary" id="connect-as-hub">Connect as the hub</button>
-            <button type="button" class="btn btn-primary" id="connect-as-cam">Connect as a camera</button>
           </div>
-          <div>
-            <button type="button" class="btn btn-primary" id="stream">Stream</button>
-          </div>
-          <div id="error-message"></div>
+          <div id="error-message" class="alert alert danger"></div>
+          <!-- TODO: add some sort of statistics here -->
         </form>
       </div>
       <!--where video player goes to-->
@@ -39,16 +39,24 @@
           <i class="fa fa-chevron-right fa-4x" aria-hidden="true"></i>
         </div>
       </div>
-      <!--local feedback view -->
-      <div id="feedback">
-          <video id="self-view" width="480" autoplay muted></video>
+      <!--Camera visualization view -->
+      <div class="webgl-content">
+        <div id="gameContainer" style="width: 480px; height: 300px"></div>
+        <div class="footer">
+          <div class="webgl-logo"></div>
+          <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+          <div class="title">CameraPlanner</div>
+        </div>
       </div>
     </div>
 
     <!-- js files -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="rtc.js"></script>
-    <script src="port.js"></script>
+    <script src="unity_build/TemplateData/UnityProgress.js"></script>
+    <script src="unity_build/Build/UnityLoader.js"></script>
+    <script src="js/rtc.js"></script>
+    <script src="js/signal-channel.js"></script>
+    <script src="js/port.js"></script>
   </body>
 </html>
