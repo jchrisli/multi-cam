@@ -55,6 +55,8 @@ function setUpHub() {
     return name !== '' && serverAddress !== '';
   }
 
+  // Gesture detection on video
+  var vidGesture;
 
   //Direction is bool variable; true for incrementing the index, false for decrementing
   //Loop back
@@ -64,7 +66,8 @@ function setUpHub() {
       if(curStreamInd < 0) curStreamInd = streams.length - 1;
       if(streamViewElement) {
         streamViewElement.attr('src', streams[curStreamInd].vid);
-    }
+        if(vidGesture) vidGesture.setCurrentSource(streams[curStreamInd].id);
+      }
   }
 
   //To be called by the Unity Script
@@ -72,10 +75,11 @@ function setUpHub() {
       let target = streams.find(streamObj => streamObj.id === id);
       if(target) {
           streamViewElement.attr('src', target.vid);
-      } else console.error('Cannot switch to stream ' + id + ' :not found.');
+          if(vidGesture) vidGesture.setCurrentSource(id);
+      } else console.error('Cannot switch to stream ' + id + ': not found.');
   }
 
-  function addStreamView(initSource) {
+  function addStreamView(initSource, initId) {
     var vidDiv = $('<div></div>', {
       class: 'camera-view-wrapper',
     });
@@ -103,6 +107,13 @@ function setUpHub() {
     vidDiv.append(vid);
     vidDiv.append(name);
     vidDiv.appendTo($('#video-wrapper'));
+
+    // Initiate gesture detection
+    vidGesture = new VideoGesture({
+      element: ($('.camera-view').first())[0],
+      connection: wsc
+    });
+    vidGesture.setCurrentSource(initId);
   }
 
   //Add only one video element, which supports switching between the streams
@@ -114,7 +125,7 @@ function setUpHub() {
       gameInstance.SendMessage('Scene', 'AddCam', id);
       //if this is the first stream added, create the video videw
       if (streams.length === 1) {
-        addStreamView(source);
+        addStreamView(source, id);
       }
     }
   }
@@ -164,7 +175,7 @@ function setUpHub() {
     var name = $('#name-input').val();
     var serverAddress = $('#server-address-input').val();
     if(name && serverAddress) {
-      wsc = new SignalChannel(serverAddress, state, pc, null, notify, createHubRTC);
+      wsc = new SignalChannel(serverAddress, state, pc, null, notify, createHubRTC, null);
       successCallback();
     } else {
       notify('name or server address cannot be empty.');

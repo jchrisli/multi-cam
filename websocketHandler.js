@@ -41,6 +41,7 @@
               break;
             case 'sdp':
             case 'candidate':
+            case 'suggestion':
               messenger.sendMessage(message.from, message.to, message.type, message.message);
               break;
             default:

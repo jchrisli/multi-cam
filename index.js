@@ -22,6 +22,11 @@ app.get('/', function(req, res) {
     res.sendFile('public/port.html', {root: __dirname});
 });
 
+// Test page, for development only
+app.get('/test', function(req, res) {
+  res.sendFile('public/gesturetest.html', {root: __dirname});
+});
+
 
 //create a HTTPS server
 var server = https.createServer({

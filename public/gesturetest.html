@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Multiple Camera Experiment</title>
+    <style>
+      #testsvg {
+        position: absolute;
+        z-index: 1;
+      }
+      #testvideo {
+        position: absolute;
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="fullscreenvideowrapper">
+      <video width="1280" height="720" id="testvideo">
+          <source src="samplevideo.mp4" type="video/mp4">
+      </video>
+      <svg id="testsvg" width="1280" height="720"></svg>
+    </div>
+    <div>
+    </div>
+    
+    <script type="text/javascript" src="bower_components/hammerjs/hammer.js"></script>
+    <script type="text/javascript" src="bower_components/Snap.svg/dist/snap.svg.js"></script>
+    <script type="text/javascript" src="js/video-gesture.js"></script>
+    <script type="text/javascript" src="js/video-vis.js"></script>
+    <script type="text/javascript">
+        //var vg = VideoGesture({element: document.getElementById("testvideo")});
+        var videoEle = document.getElementById('fullscreenvideowrapper');
+        var vis;
+        videoEle.onclick = function () {
+            //this.webkitRequestFullscreen();
+            vis = new VideoVis({element: document.getElementById("testsvg")});
+            setTimeout(() => {vis.drawCurvedArrow(true); }, 1000);
+        };
+    </script>
+  </body>
+</html>

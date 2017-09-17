@@ -13,9 +13,19 @@ function setUpCam() {
     isHub: false
   };
   //peer connections are keyed by non-hub end id number
+  //WebRTC streams
   var pc = new Map();
   var wsc = null;
-  //WebRTC streams
+
+  // Processing and displaying suggestions from the other end
+  var vidVis =  new VideoVis({
+    element: $('#move-suggestion-vis')[0]
+  });
+  var sugManager = new SuggestionManager(vidVis);
+
+  document.onresize = function () {
+    vidVis.updateCanvasSize();
+  }
 
   function checkInputs() {
     return name !== '' && serverAddress !== '';
@@ -43,6 +53,7 @@ function setUpCam() {
           var feedback = $('#feedback');
           //Make the feedback view full-screen
           feedback[0].webkitRequestFullscreen();
+          vidVis.updateCanvasSize();
       } else {
           notify('No signalling channel found.');
       }
@@ -53,7 +64,7 @@ function setUpCam() {
     var name = $('#name-input').val();
     var serverAddress = $('#server-address-input').val();
     if(name && serverAddress) {
-      wsc = new SignalChannel(serverAddress, state, pc, null, notify, null);
+      wsc = new SignalChannel(serverAddress, state, pc, null, notify, null, sugManager);
       disableCallback();
     } else {
       notify('Name or server address cannot be empty.');

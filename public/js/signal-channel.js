@@ -1,6 +1,6 @@
 //WebSocket object
 //FIXME: Use settings, successCallback, failureCallback as parameters
-function SignalChannel(serverUrl, state, pc, closeCallback, uiCallback, rtcCallback) {
+function SignalChannel(serverUrl, state, pc, closeCallback, uiCallback, rtcCallback, suggestionManager) {
     var connection = new WebSocket('wss://' + serverUrl);
     connection.onopen = function(evt) {
       //send a hello message to get id
@@ -21,9 +21,11 @@ function SignalChannel(serverUrl, state, pc, closeCallback, uiCallback, rtcCallb
         from: from,
         to: to,
         message: message
-    };
-      connection.send(JSON.stringify(toSend));
-  };
+      };
+      var signal = JSON.stringify(toSend);
+      connection.send(signal);
+      console.log(signal);
+    }
     this.signalToServer = signalToServer;
     function createRespondToServerHandle (from, to) {
         var fn = function(rtcSignal) {
@@ -32,7 +34,7 @@ function SignalChannel(serverUrl, state, pc, closeCallback, uiCallback, rtcCallb
           } else console.error('The signal message cannot be parsed. Wrong type.');
         }
         return fn;
-    };
+    }
     this.createRespondToServerHandle = createRespondToServerHandle;
 
     function WSMessageHandler(updateCB) {
@@ -77,6 +79,15 @@ function SignalChannel(serverUrl, state, pc, closeCallback, uiCallback, rtcCallb
           case 'name':
             //$('#cam-vid-' + message.from).html('Camera ' + message.message);
             //TODO: add names to the stream view
+            break;
+          case 'suggestion': {
+              let suggestion = message.message;
+              if(suggestion.type === 'translate') {
+                  suggestionManager.onTranslate(suggestion.value);
+              } else if(suggestion.type === 'translateend') {
+                  suggestionManager.onTranslateEnd();
+              }
+            }
             break;
           default:
             updateCB('WebSocket error: Unknow message type.');

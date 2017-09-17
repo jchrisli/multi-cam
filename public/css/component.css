@@ -11,3 +11,20 @@
   -webkit-align-items: center;
   align-items: center;
 }
+
+#feedback {
+  position: relative;
+  width: 100%;
+}
+
+#self-view {
+  width: 100%;
+  z-index: 0;
+}
+
+#move-suggestion-vis {
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 1;
+}
