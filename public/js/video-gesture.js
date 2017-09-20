@@ -5,7 +5,19 @@ function VideoGesture(config) {
         conn = config.connection || null,
         sourceId = -1, //Id of the video source
         prevPanPos = {x: -1, y: -1},
-        currentPanPos = {x: -1, y: -1}; 
+        currentPanPos = {x: -1, y: -1},
+        prevPinchContacts = {
+            x1: -1,
+            y1: -1,
+            x2: -1,
+            y2: -1
+        },
+        curPinchContacts = {
+            x1: -1,
+            y1: -1,
+            x2: -1,
+            y2: -1
+        }; 
     
     if(!vidEle || !conn) {
         console.error('VideoGesture cannot be initiated. Wrong config.');
@@ -26,8 +38,9 @@ function VideoGesture(config) {
 
     gestureRecognizer.on('panstart', function(evt) {
         prevPanPos = evt.center;
+        console.log('panstart evt:', evt);
     });
-
+    
     gestureRecognizer.on('pan', function(evt) {
         currentPanPos = evt.center;
         //TODO: emit an message for the new suggested direction
@@ -42,13 +55,29 @@ function VideoGesture(config) {
         vec.y = vec.y / vecMod;
         */
         //prevPanPos = currentPanPos;
+        console.log('pan evt:', evt);
         sendMessage('translate', vec);
-        
     });
-
+    
     gestureRecognizer.on('panend', function (evt) {
         //TODO: emit an message for the ending of a direction suggestion
+        console.log('panend evt:', evt);
         sendMessage('translateend', null);
+    });
+
+    gestureRecognizer.on('pinchstart', function (evt) {
+        //prevPinchContacts
+        console.log('pinchstart evt:', evt);
+    });
+    
+    gestureRecognizer.on('pinchmove', function(evt) {
+        console.log('pinchmove evt:', evt);
+        
+    });
+    
+    gestureRecognizer.on('pinchend', function(evt) {
+        console.log('pinchend evt:', evt);
+
     });
 
     ///// Communication /////

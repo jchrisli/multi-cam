@@ -2,10 +2,12 @@
 <html>
   <head>
     <title>Multiple Camera Experiment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    
     <style>
       #testsvg {
         position: absolute;
-        z-index: 1;
+        z-index: -1;
       }
       #testvideo {
         position: absolute;
@@ -28,7 +30,8 @@
     <script type="text/javascript" src="js/video-gesture.js"></script>
     <script type="text/javascript" src="js/video-vis.js"></script>
     <script type="text/javascript">
-        //var vg = VideoGesture({element: document.getElementById("testvideo")});
+        var vg = VideoGesture({element: document.getElementById("testvideo")});
+        /*
         var videoEle = document.getElementById('fullscreenvideowrapper');
         var vis;
         videoEle.onclick = function () {
@@ -36,6 +39,7 @@
             vis = new VideoVis({element: document.getElementById("testsvg")});
             setTimeout(() => {vis.drawCurvedArrow(true); }, 1000);
         };
+        */
     </script>
   </body>
 </html>
