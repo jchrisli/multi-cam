@@ -122,7 +122,7 @@ function setUpHub() {
     return function (source) {
       streams.push({id: id, vid: source});
       //Notify the webgl app of the new stream
-      gameInstance.SendMessage('Scene', 'AddCam', id);
+      if(gameInstance) gameInstance.SendMessage('Scene', 'AddCam', id);
       //if this is the first stream added, create the video videw
       if (streams.length === 1) {
         addStreamView(source, id);
@@ -188,7 +188,7 @@ function setUpHub() {
     wsConnect(function () {
         $('#connect-as-hub').html('Connected');
         $('#connect-as-hub').prop('disabled', true)
-        gameInstance = UnityLoader.instantiate("gameContainer", "unity_build/Build/unity_build.json", {onProgress: UnityProgress});
+        //gameInstance = UnityLoader.instantiate("gameContainer", "unity_build/Build/unity_build.json", {onProgress: UnityProgress});
     });
   });
 

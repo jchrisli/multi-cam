@@ -22,11 +22,11 @@ function setUpCam() {
     element: $('#move-suggestion-vis')[0]
   });
   var sugManager = new SuggestionManager(vidVis);
-
+/*
   document.onresize = function () {
     vidVis.updateCanvasSize();
   }
-
+*/
   function checkInputs() {
     return name !== '' && serverAddress !== '';
   }
@@ -50,9 +50,13 @@ function setUpCam() {
           };
           pc.set(0, RTC.create(true, cbs));
 
-          var feedback = $('#feedback');
+          var feedback = $('#feedback'),
+              feedbackVid = $('#self-view');
           //Make the feedback view full-screen
-          feedback[0].webkitRequestFullscreen();
+          //feedback[0].webkitRequestFullscreen();
+          feedback.css('height', '100%');
+          feedbackVid.css('height', 'auto');
+          console.log('Height changed to', feedback[0].getBoundingClientRect().height);
           vidVis.updateCanvasSize();
       } else {
           notify('No signalling channel found.');
@@ -84,9 +88,11 @@ function setUpCam() {
     createRTC();
   });
 
-  var defaultUrl = window.location.href;
+  //Ignoring 'https://'
+  var defaultUrl = window.location.href.substring(8),
+    urlEndInd = defaultUrl.indexOf('/');
 
-  $('#server-address-input').val(defaultUrl.substring(8, defaultUrl.length - 1));
+  $('#server-address-input').val(defaultUrl.substring(0, urlEndInd));
 
   //Interface to the UnityScript
   return {

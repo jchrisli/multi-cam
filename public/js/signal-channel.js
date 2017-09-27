@@ -84,8 +84,10 @@ function SignalChannel(serverUrl, state, pc, closeCallback, uiCallback, rtcCallb
               let suggestion = message.message;
               if(suggestion.type === 'translate') {
                   suggestionManager.onTranslate(suggestion.value);
-              } else if(suggestion.type === 'translateend') {
-                  suggestionManager.onTranslateEnd();
+              } else if(suggestion.type === 'rotatestart') {
+                  suggestionManager.onRotate(suggestion.value);
+              } else if(suggestion.type === 'suggestionend') {
+                  suggestionManager.onSuggestionEnd();
               }
             }
             break;

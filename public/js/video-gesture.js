@@ -6,18 +6,18 @@ function VideoGesture(config) {
         sourceId = -1, //Id of the video source
         prevPanPos = {x: -1, y: -1},
         currentPanPos = {x: -1, y: -1},
-        prevPinchContacts = {
-            x1: -1,
-            y1: -1,
-            x2: -1,
-            y2: -1
+        prevPinchCenter  = {
+            x: -1,
+            y: -1
         },
         curPinchContacts = {
-            x1: -1,
-            y1: -1,
-            x2: -1,
-            y2: -1
-        }; 
+            x: -1,
+            y: -1
+        };
+
+    //Constants
+    var TWO_FINGER_PAN_MAX_SCALE = 1.1,
+        TWO_FINGER_PAN_MIN_SCALE = 0.9;
     
     if(!vidEle || !conn) {
         console.error('VideoGesture cannot be initiated. Wrong config.');
@@ -55,37 +55,48 @@ function VideoGesture(config) {
         vec.y = vec.y / vecMod;
         */
         //prevPanPos = currentPanPos;
-        console.log('pan evt:', evt);
+        //console.log('pan evt:', evt);
         sendMessage('translate', vec);
     });
     
     gestureRecognizer.on('panend', function (evt) {
         //TODO: emit an message for the ending of a direction suggestion
-        console.log('panend evt:', evt);
-        sendMessage('translateend', null);
+        //console.log('panend evt:', evt);
+        sendMessage('suggestionend', null);
     });
 
     gestureRecognizer.on('pinchstart', function (evt) {
         //prevPinchContacts
-        console.log('pinchstart evt:', evt);
+        //console.log('pinchstart evt:', evt);
+        prevPinchCenter = evt.center;
     });
     
     gestureRecognizer.on('pinchmove', function(evt) {
-        console.log('pinchmove evt:', evt);
-        
+        //console.log('pinchmove evt:', evt);
+        //Make sure it is actually a two-finger pan
+        if(evt.scale < TWO_FINGER_PAN_MAX_SCALE && evt.scale > TWO_FINGER_PAN_MIN_SCALE) {
+            let dir = {
+                x: evt.center.x - prevPinchCenter.x,
+                y: evt.center.y - prevPinchCenter.y,
+            };
+
+            //Send a message 
+            sendMessage('rotatestart', dir);
+        }
     });
     
     gestureRecognizer.on('pinchend', function(evt) {
-        console.log('pinchend evt:', evt);
-
+        //console.log('pinchend evt:', evt);
+        //One method to end them all
+        sendMessage('suggestionend', null);
     });
 
     ///// Communication /////
     function sendMessage(type, data) {
         //
         // Six type of movement messages : translate, translateend, rotate, rotateend, zoom, zoomend
-        // Data for translate: {x: number, y: number} normalized direction vector
-        // Data for rotate: {axisAngle: number, clockwise: boolean}
+        // Data for translate: {x: number, y: number} direction vector
+        // Data for rotate: {x: number, y: number} direction vector
         // Data for zoom: {in: boolean} zoom in or out
         //
         var message  = {

@@ -12,10 +12,14 @@ function SuggestionManager(videoVis) {
     }
 
     this.onTranslate = function (direction) {
-        vidVis.drawStraightArrow (vec2angle(direction));
+        vidVis.drawArrow ('straight', vec2angle(direction));
     };
 
-    this.onTranslateEnd = function () {
-        videoVis.hideStraightArrow();  
+    this.onSuggestionEnd = function () {
+        videoVis.hideArrow();  
+    };
+
+    this.onRotate = function (direction) {
+        videoVis.drawArrow('curved', vec2angle(direction));
     };
 }
